@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -114,6 +115,54 @@ nav a:focus-visible,nav button:focus-visible{outline:1px solid #fff;outline-offs
     })(t0);
   }
 
+  /* URL: зацикленная анимация ника */
+  var urlBase=location.pathname.endsWith('/')
+    ? location.pathname
+    : location.pathname.slice(0,location.pathname.lastIndexOf('/')+1);
+
+  var urlChars='▒░*+01';
+
+  function setUrl(value){
+    try{
+      history.replaceState(null,'',urlBase+value);
+    }catch(e){}
+  }
+
+  function scrambleUrl(){
+    var txt='cultist', t0=performance.now(), dur=1400, last=0;
+
+    (function tick(now){
+      var p=Math.min(1,(now-t0)/dur);
+
+      if(now-last>=110||p===1){
+        var out='';
+
+        for(var i=0;i<txt.length;i++){
+          out+=(p*txt.length*1.5>i)
+            ? txt[i]
+            : urlChars[Math.random()*urlChars.length|0];
+        }
+
+        setUrl(out);
+        last=now;
+      }
+
+      if(p<1){
+        requestAnimationFrame(tick);
+      }else{
+        setUrl(txt);
+      }
+    })(t0);
+  }
+
+  function startUrlAnimation(){
+    function cycle(){
+      scrambleUrl();
+      setTimeout(cycle,5200);
+    }
+    cycle();
+  }
+
   function enter(e){
     var st=document.getElementById('stage');
     st.style.setProperty('--cx',(e.clientX||innerWidth/2)+'px');
@@ -122,7 +171,7 @@ nav a:focus-visible,nav button:focus-visible{outline:1px solid #fff;outline-offs
     bg.muted=false;
     var p=bg.play();
     if(p&&p.then){p.then(function(){setSnd(true)}).catch(function(){bg.muted=true;bg.play().catch(function(){});setSnd(false)})}
-    if(!reduce){name.textContent='';setTimeout(function(){scramble(name)},700)}
+    if(!reduce){name.textContent='';setTimeout(function(){scramble(name);startUrlAnimation()},700)}
   }
   gate.addEventListener('click',enter,{once:true});
 
